@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>JsTemp demo</title>
+</head>
+
+<body>
+    <!--#> 
+             //js模板引擎测试
+             var title="JavaScript Template Demo";
+             var data=['label 1','label 2','label 3'];            
+    <#-->
+    <h1>${title}</h1>
+    <!--#>
+             for(var i=0;i<data.length;i++){
+     <#-->
+    <label>${data[i]}<br /></label>
+    <!--#>if(i==data.length-1)<#-->
+    <span>********************************</span>
+    <!--#>}<#-->
+    <br />
+
+    <select id="select1">
+        <!-- 使用该标签可以，可以简化写法-->
+        <!--@>         
+        {#
+                for(var i=0;i<selectItem.length;i++){
+                    if(selectItem[i].selected)
+                    {
+        #}
+        <option value="${selectItem[i].value}" selected="selected" >${selectItem[i].name}</option>
+        {#             
+                    } else
+                    {
+        #}
+        <option value="${selectItem[i].value}">${selectItem[i].name}</option>
+        {#          }  
+                } 
+        #} 
+        <@-->
+    </select>
+
+
+    &nbsp;&nbsp;&nbsp;
+    <input type="button" onclick="refreshSelect();" value="刷新下拉框" />
+</body>
+<script type="text/javascript" src="jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="JavaScriptTemp.js"></script>
+<script>
+    var selectItem = [];
+    $(function () {
+        //整个刷新
+        renderTamplate();
+        selectItem = [{
+            "name": "选项1",
+            "value": 1
+        }, {
+            "name": "选项2",
+            "value": 2
+        }, {
+            "name": "选项3",
+            "value": 3
+        }];
+        //局部刷新
+        renderTamplate("select1");
+    });
+
+
+    function refreshSelect() {
+        var obj = {};
+        obj.selectItem = [{
+                "name": "item1",
+                "value": 1
+            }, {
+                "name": "item2",
+                "value": 2
+            }, {
+                "name": "item3",
+                "value": 3,
+                "selected": true
+            },
+            {
+                "name": "item4",
+                "value": 4
+            }
+        ];
+        //支持外部传值
+        renderTamplate("select1", obj);
+    }
+</script>
+
+</html>
