@@ -48,6 +48,23 @@ function removeSection(content, preMark, sufMark) {
     return nArr.join(' ');
 }
 
+function initTamplate(content) {
+    var list = spiteToSection(content, "<!--@>", "<@-->");
+    for (var i = 0; i < list.length; i++) {
+        var str = list[i];
+        if (!list[i].startsWith("<!--@>")) {
+            str = removeSection(str, "<script", "</script>");
+            str = removeSection(str, "<style", "</style>");
+            str = removeSection(str, "<link", "</link>");
+        }
+        list[i] = str;
+    }
+    var rs = list.join(' ').replace(new RegExp('\\{#', "gim"), "<!--#>")
+        .replace(new RegExp('#\\}', "gim"), "<#-->")
+        .replace(new RegExp('(<!--@>)|(<@-->)', "gim"), "");
+    return rs;
+}
+
 function reanderTemplateContent(content) {
     var htmlContent = "";
     var list = spiteToSection(content, "<!--#>", "<#-->");
@@ -60,9 +77,6 @@ function reanderTemplateContent(content) {
         }
     }
     code = code.replace(new RegExp('//.*', "gim"), "").replace(new RegExp('\n', "gim"), " ");
-    code = removeSection(code, "<script", "</script>");
-    code = removeSection(code, "<style", "</style>");
-    code = removeSection(code, "<link", "</link>");
     eval(code);
     return htmlContent;
 }
@@ -92,10 +106,7 @@ function tryGetVal(fc) {
 function renderTamplate(tamplateId, obj) {
     try {
         if (!window.htmlBodyTemp)
-            window.htmlBodyTemp = "<div>" + $(document.body).html()
-            .replace(new RegExp('\\{#', "gim"), "<!--#>")
-            .replace(new RegExp('#\\}', "gim"), "<#-->")
-            .replace(new RegExp('(<!--@>)|(<@-->)', "gim"), "") + "</div>";
+            window.htmlBodyTemp = "<div>" + initTamplate($(document.body).html())+ "</div>";
         if (obj)
             $.extend(this, obj);
         var strHtml = window.htmlBodyTemp;
