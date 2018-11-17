@@ -65,23 +65,7 @@ function initTamplate(content) {
     return rs;
 }
 
-function reanderTemplateContent(content) {
-    var htmlContent = "";
-    var list = spiteToSection(content, "<!--#>", "<#-->");
-    var code = '';
-    for (var i = 0; i < list.length; i++) {
-        if (list[i].startsWith("<!--#>")) {
-            code += list[i].replace("<!--#>", "").replace("<#-->", "");
-        } else {
-            code += reanderHtmlStr(list[i]);
-        }
-    }
-    code = code.replace(new RegExp('//.*', "gim"), "").replace(new RegExp('\n', "gim"), " ");
-    eval(code);
-    return htmlContent;
-}
-
-function reanderHtmlStr(content) {
+function renderElement(content) {
     var code = "";
     var list = spiteToSection(content, "${", "}");
     for (var i = 0; i < list.length; i++) {
@@ -102,21 +86,40 @@ function tryGetVal(fc) {
         return "";
     }
 }
-//渲染模板
-function renderTamplate(tamplateId, obj) {
+//渲染内容
+function reanderContent(content, obj) {
     try {
-        if (!window.htmlBodyTemp)
-            window.htmlBodyTemp = "<div>" + initTamplate($(document.body).html())+ "</div>";
         if (obj)
             $.extend(this, obj);
-        var strHtml = window.htmlBodyTemp;
-        if (!tamplateId)
-            tamplateId = document.body;
-        else
-            strHtml = $(strHtml).find(tamplateId = "#" + tamplateId).html();
-        strHtml = reanderTemplateContent(strHtml);
-        $(tamplateId).html(strHtml);
+        var htmlContent = "";
+        var list = spiteToSection(initTamplate(content), "<!--#>", "<#-->");
+        var code = '';
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].startsWith("<!--#>")) {
+                code += list[i].replace("<!--#>", "").replace("<#-->", "");
+            } else {
+                code += renderElement(list[i]);
+            }
+        }
+        code = code.replace(new RegExp('//.*', "gim"), "").replace(new RegExp('\n', "gim"), " ");
+        eval(code);
+        return htmlContent;
     } catch (err) {
         console.error("Render template error.");
+        console.log(err.message);
     }
 }
+//渲染模板
+function renderTamplate(tamplateId, obj) {
+    var strHtml = window.htmlBodyTemp;
+    if (!tamplateId)
+        tamplateId = document.body;
+    else
+        strHtml = $(strHtml).find(tamplateId = "#" + tamplateId).html();
+    strHtml = reanderContent(strHtml, obj);
+    $(tamplateId).html(strHtml);
+}
+$(function () {
+    if (!window.htmlBodyTemp)
+        window.htmlBodyTemp = "<div>" + $(document.body).html() + "</div>";
+})
