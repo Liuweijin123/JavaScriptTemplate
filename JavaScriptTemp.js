@@ -1,40 +1,36 @@
 function spiteToSection(content, preMark, sufMark) {
-    var list = [];
-    var mArr = preMark;
-    var sb = "";
-    var isSkip = false;
+    var sections = [],
+        indexs = [0];
+    var slide = "";
+    var cnt = 0;
     for (var i = 0; i < content.length; i++) {
-        for (var j = 0; j < mArr.length; j++) {
-            if (content[i + j] !== mArr[j])
-                break;
-            if (j === mArr.length - 1) {
-                if (mArr === preMark) {
-                    mArr = sufMark;
-                    if (sb.length > 0) {
-                        list.push(sb);
-                        sb = "";
-                    }
-                    sb += preMark;
-                } else {
-                    mArr = preMark;
-                    sb += sufMark;
-                    list.push(sb);
-                    sb = "";
-                }
-                i += j;
-                isSkip = true;
+        for (var j = 0; j < preMark.length || j < sufMark.length; j++) {
+            slide += content[i + j];
+            if (content[i + j] !== preMark[j] && content[i + j] !== sufMark[j]) {
                 break;
             }
+            if (slide === preMark) {
+                if (!cnt && i !== 0) {
+                    indexs.push(i);
+                }
+                cnt++;
+                i += j;
+            }
+            if (slide === sufMark) {
+                cnt--;
+                i += j;
+                if (!cnt && i + 1 !== content.length) {
+                    indexs.push(i + 1);
+                }
+            }
         }
-        if (isSkip)
-            isSkip = false;
-        else {
-            sb += content[i];
-        }
+        slide = "";
     }
-    if (sb.length > 0)
-        list.push(sb);
-    return list;
+    indexs.push(content.length);
+    for (var i = 0; i < indexs.length - 1; i++) {
+        sections.push(content.substring(indexs[i], indexs[i + 1]));
+    }
+    return sections;
 }
 
 function removeSection(content, preMark, sufMark) {
