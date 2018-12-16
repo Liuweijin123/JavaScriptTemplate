@@ -1,6 +1,6 @@
 function spiteToSection(content, preMark, sufMark) {
     var sections = [],
-        indexs = [0];
+        positions = [0];
     var slide = "";
     var cnt = 0;
     for (var i = 0; i < content.length; i++) {
@@ -11,7 +11,7 @@ function spiteToSection(content, preMark, sufMark) {
             }
             if (slide === preMark) {
                 if (!cnt && i !== 0) {
-                    indexs.push(i);
+                    positions.push(i);
                 }
                 cnt++;
                 i += j;
@@ -20,15 +20,15 @@ function spiteToSection(content, preMark, sufMark) {
                 cnt--;
                 i += j;
                 if (!cnt && i + 1 !== content.length) {
-                    indexs.push(i + 1);
+                    positions.push(i + 1);
                 }
             }
         }
         slide = "";
     }
-    indexs.push(content.length);
-    for (var i = 0; i < indexs.length - 1; i++) {
-        sections.push(content.substring(indexs[i], indexs[i + 1]));
+    positions.push(content.length);
+    for (var i = 0; i < positions.length - 1; i++) {
+        sections.push(content.substring(positions[i], positions[i + 1]));
     }
     return sections;
 }
@@ -85,21 +85,22 @@ function tryGetVal(fc) {
 //渲染内容
 function reanderContent(content, obj) {
     try {
-        if (obj)
-            $.extend(this, obj);
-        var htmlContent = "";
-        var list = spiteToSection(initTamplate(content), "<!--#>", "<#-->");
-        var code = '';
-        for (var i = 0; i < list.length; i++) {
-            if (list[i].startsWith("<!--#>")) {
-                code += list[i].replace("<!--#>", "").replace("<#-->", "");
-            } else {
-                code += renderElement(list[i]);
+        with(obj, this) {
+            var htmlContent = "";
+            var list = spiteToSection(initTamplate(content), "<!--#>", "<#-->");
+            var code = '';
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].startsWith("<!--#>")) {
+                    code += list[i].replace("<!--#>", "").replace("<#-->", "");
+                } else {
+                    code += renderElement(list[i]);
+                }
             }
+            code = code.replace(new RegExp('//.*', "gim"), "").replace(new RegExp('\n', "gim"), " ");
+            eval(code);
+
+            return htmlContent;
         }
-        code = code.replace(new RegExp('//.*', "gim"), "").replace(new RegExp('\n', "gim"), " ");
-        eval(code);
-        return htmlContent;
     } catch (err) {
         console.error("Render template error.");
         console.log(err.message);
